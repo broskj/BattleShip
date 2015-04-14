@@ -133,6 +133,7 @@ bool playerTurn(Board *playerOne, Board *playerTwo, Player *playerShip, int play
     if(playerTwo->checkGameOver() == 1)
     {
         cout << "Player " << player << " wins!" << endl;
+        //play animation
         pause();
         return true;
         //if all ships have been sunk, the value of true is returned.
@@ -163,6 +164,7 @@ bool playerTurn(Board *playerOne, Board *playerTwo, Computer *computerShip, int 
     if(playerTwo->checkGameOver() == 1)
     {
         cout << "Player " << player << " wins!" << endl;
+        //play animation
         pause();
         return true;
         //if all ships have been sunk, the value of true is returned.
