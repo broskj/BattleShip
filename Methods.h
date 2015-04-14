@@ -443,11 +443,44 @@ void printInstructions()
     cout << "If the shot hits one of their ships, your display for their board will record\n an 'X' where the hit took place.\n";
     cout << "If the shot misses any ships and lands in open water, the board will record an\n 'O'.\n";
     cout << "The computer is now passed to your opponent and they likewise try to hit your\n ships.\n";
+    cout << "\nRepeat this process of shooting and switching until either player sinks all of\n the other player's ships and wins.\n";
     pause();
     cls();
 
-    cout << "Repeat this process of shooting and switching until either player sinks all of\n the other player's ships and wins.\n";
-    cout << "Returning to main menu." << endl;
+    //cout << "Returning to main menu." << endl;
+
+    cout << "Player vs. Computer Directions:" << endl;
+    cout << "Object of the game: sink the computer's ships before it sinks yours." << endl << endl;
+    pause();
+    cls();
+
+    cout << "Prepare for Battle: " << endl;
+    cout << "Follow the directions to place each of your 5 ships on your ocean grid.\n";
+    cout << "Ships are placed by entering the column and row coordinates for both the bow\n and stern of each ship." << endl;
+    cout << "Ships may be placed in any horizontal or vertical position within the grid.\n They may not, however, be placed diagonally.\n";
+    cout << "Ships may not be placed so that they overlap the edge of the grid or another\n ship.\n";
+    cout << "Ship positions will remain constant throughout the gameplay.\n";
+    cout << "The computer will automatically place its own ships.\n\n";
+    pause();
+    cls();
+
+    cout << "Gameplay:\n";
+    cout << "Your screen will display both yours and the computer's boards.\n";
+    cout << "Your board will display whip location with an S . Open water is marked: ~\n";
+    cout << "The computer's board will initially only display open water ~.\n";
+    cout << "You will enter the row and column coordinates for a shot at the computer's ships\n";
+    cout << "If the shot hits one of its ships, your display for its board will\n";
+    cout << " record an X where the hit took place.\n";
+    cout << "If the shot misses any ships and lands in open water, the board\n";
+    cout << " will record an O.\n";
+    cout << "Then the computer takes a shot at your ships.\n";
+    cout << "Any hits on your ships will be marked X and any misses marked O.\n";
+    pause();
+    cls();
+
+    cout << "Continue entering shot coordinates until you sink all the computer's\n";
+    cout << "ships and win or have all your ships sunk and lose.\n";
+    cout << "\nReturning to main menu." << endl;
     pause();
     cls();
 
