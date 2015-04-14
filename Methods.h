@@ -486,4 +486,31 @@ void printInstructions()
 
 }//end printInstructions
 
+void shipAnimation(int player){
+
+    vector<string> lines;
+	ifstream file("ship.txt");
+	string str;
+
+	while(std::getline(file, str)){
+		lines.push_back(str);
+	}
+
+	for(int j=0; j<44; j++){
+		for(int k=j; k>0; k--)
+			cout<<endl;
+		for(int i=0; i<lines.size(); i++){
+			cout<<lines[i]<<endl;
+		}
+		cout<< "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" <<endl;
+        if(player != 0)
+            cout << "Player " << player << " wins!" << endl;
+        else
+            cout << "YOU LOSE COMPUTER WINS" <<endl;
+		lines.pop_back();
+		sleep(100000);
+		cls();
+	}
+}// end shipAnimation
+
 #endif
