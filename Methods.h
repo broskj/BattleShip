@@ -4,6 +4,7 @@
 #include <iostream>
 #include <cmath>
 #include <stdlib.h>
+#include <fstream>
 #include "Player.h"
 #include "Board.h"
 #include "Definitions.h"
@@ -73,6 +74,69 @@ bool isValid(int startRow, int endRow, char startColumn, char endColumn, Player 
     return true;
 }//end isValid
 
+void randomPlacement(Board *&playerBoard, Player *&playerShip)
+{
+    /*
+     * method used for AI, as well as for the player should they choose
+     *  to use it.  uses random number generator to pick a starting point
+     *  and an orientation, and places a ship should the location be valid.
+     */
+    int row = 0, size = 0, orientation = 0 /*Use 0 for vertical, 1 for horizontal*/;
+    char col = 'A';
+
+
+    srand(time(NULL));
+    for(int i = 0; i < MAX_SHIPS; i++)
+    {
+        size = playerShip->getShipSize(i);
+        while(true)
+        {
+A:
+            orientation = rand() % 2; // random number between 0 and 1
+            row = rand() % 10; // random number between 0 and 9
+            if((row+size) > 9)
+                row -= size;
+            col = rand() % 10 + 'A'; // random number between 65 and 74 (A through J)
+            if((col+size) > 'J')
+                col -= size;
+
+            if(playerBoard->getIndex(row, col) != 0)
+                goto A;
+
+            /*
+             * row and col are starting coordinates.
+             * if orientation is vertical, then add ship size to row.
+             *  check that it's valid, then playerBoard->placeShip(row, row+-shipSize, col, col, playerShip, shipSize)
+             * else if orientation is horizontal, then add ship size to col.
+             *  check that it's valid, then playerBoard->placeShip(row, row, col, col+-shipSize, playerShip, shipSize)
+             */
+
+            if(orientation == 0)
+            {
+                if(isValid(row, row+size-1, col, col, playerShip, playerBoard, size) && rowWithinBounds(row+size-1))
+                {
+                    playerBoard->placeShip(row, row+size-1, col, col, playerShip, i);
+                    break;
+                }
+                else
+                    goto A;
+            }
+            else if(orientation == 1)
+            {
+                if(isValid(row, row, col, col+size-1, playerShip, playerBoard, size) && colWithinBounds(col+size-1))
+                {
+                    playerBoard->placeShip(row, row, col, col+size-1, playerShip, i);
+                    break;
+                }
+                else
+                    goto A;
+            }
+            else
+                pause();
+        }
+    }
+}//end randomPlacement
+
 void initialShipPlacement(Board *&playerBoard, Player *&playerShip)
 {
     //This method is used to do the initial ship placement for each player, at the start of the game
@@ -82,79 +146,90 @@ void initialShipPlacement(Board *&playerBoard, Player *&playerShip)
     int endRow = 0;
     char startColumn = 'A';
     char endColumn = 'A';
+    string buffer;
     bool flag = false;
 
-    for(int i = 0; i < MAX_SHIPS; i++)
+    cout << "Would you like to place your own ships? [y/n]" << endl;
+    cin >> buffer;
+
+    if(buffer.compare("n") == 0 || buffer.compare("N") == 0)
+        randomPlacement(playerBoard, playerShip);
+    else
     {
-        //a for loop is used to iterate through the number of ships that needs to be placed
 
-        do
+
+        for(int i = 0; i < MAX_SHIPS; i++)
         {
-            if(!flag)
-            {
-                if(i != 0)
-                    cls();
-                playerBoard->printBoard(1);
-                //The player's board is printed, so they can see where they would like to place their ships
-            }
+            //a for loop is used to iterate through the number of ships that needs to be placed
 
-            //Each player is prompted to enter the starting coordinate of the ship
-            cout << "Enter starting coordinate for ship of size " << playerShip->getShipSize(i) << " " << "\n";
-            cin >> startRow;
-
-            //This loop is used to continually ask the user for a correct input value, if an incorrect value is entered.
-            while (!rowWithinBounds(startRow))
+            do
             {
-                cout << "Invalid entry, row must be between 0 and 9." << endl;
+                if(!flag)
+                {
+                    if(i != 0)
+                        cls();
+                    playerBoard->printBoard(1);
+                    //The player's board is printed, so they can see where they would like to place their ships
+                }
+
+                //Each player is prompted to enter the starting coordinate of the ship
+                cout << "Enter starting coordinate for ship of size " << playerShip->getShipSize(i) << " " << "\n";
                 cin >> startRow;
-            }
 
-            //The char that they entered is converted to an uppercase letter, in case they entered a lowercase letter.
-            cin >> startColumn;
-            startColumn = toupper(startColumn);
+                //This loop is used to continually ask the user for a correct input value, if an incorrect value is entered.
+                while (!rowWithinBounds(startRow))
+                {
+                    cout << "Invalid entry, row must be between 0 and 9." << endl;
+                    cin >> startRow;
+                }
 
-            //This loop is used to continually ask the user for a correct input value, if an incorrect value is entered.
-            while(!colWithinBounds(startColumn))
-            {
-                cout << "Invalid entry, column must be between A and J." << endl;
+                //The char that they entered is converted to an uppercase letter, in case they entered a lowercase letter.
                 cin >> startColumn;
                 startColumn = toupper(startColumn);
-            }
 
-            //Then the player is prompted for the ending coordinate of the ship
-            cout << "Enter ending coordinate for ship of size " << playerShip->getShipSize(i) << " " << endl;
-            cin >> endRow;
+                //This loop is used to continually ask the user for a correct input value, if an incorrect value is entered.
+                while(!colWithinBounds(startColumn))
+                {
+                    cout << "Invalid entry, column must be between A and J." << endl;
+                    cin >> startColumn;
+                    startColumn = toupper(startColumn);
+                }
 
-            //The loop checks and prompts the user until a valid input is given.
-            while(!rowWithinBounds(endRow))
-            {
-                cout << "Invalid entry, row must be between 0 and 9." << endl;
+                //Then the player is prompted for the ending coordinate of the ship
+                cout << "Enter ending coordinate for ship of size " << playerShip->getShipSize(i) << " " << endl;
                 cin >> endRow;
-            }
 
-            //Finally, the user is prompted to enter the ending column of the ship
-            cin >> endColumn;
+                //The loop checks and prompts the user until a valid input is given.
+                while(!rowWithinBounds(endRow))
+                {
+                    cout << "Invalid entry, row must be between 0 and 9." << endl;
+                    cin >> endRow;
+                }
 
-            //The char that they entered is converted to an uppercase letter, in case they entered a lowercase letter.
-            endColumn = toupper(endColumn);
-
-            //Again, this loop is used to continually ask the user for a correct input value, if an incorrect value is entered.
-            while(!colWithinBounds(endColumn))
-            {
-                cout << "Invalid entry, column must be between A and J." << endl;
+                //Finally, the user is prompted to enter the ending column of the ship
                 cin >> endColumn;
-                endColumn = toupper(endColumn);
-            }
 
-            //flag used to indicate incorrect ship size, position, etc.
-            flag = !isValid(startRow, endRow, startColumn, endColumn, playerShip, playerBoard, playerShip->getShipSize(i));
+                //The char that they entered is converted to an uppercase letter, in case they entered a lowercase letter.
+                endColumn = toupper(endColumn);
+
+                //Again, this loop is used to continually ask the user for a correct input value, if an incorrect value is entered.
+                while(!colWithinBounds(endColumn))
+                {
+                    cout << "Invalid entry, column must be between A and J." << endl;
+                    cin >> endColumn;
+                    endColumn = toupper(endColumn);
+                }
+
+                //flag used to indicate incorrect ship size, position, etc.
+                flag = !isValid(startRow, endRow, startColumn, endColumn, playerShip, playerBoard, playerShip->getShipSize(i));
+
+            }
+            while(flag);
+
+            //once the user has sucessfully entered the columns and rows for their ships, the ship can officially be placed, using the place ship method.
+            playerBoard->placeShip(startRow, endRow, startColumn, endColumn, playerShip, i);
 
         }
-        while(flag);
-
-        //once the user has sucessfully entered the columns and rows for their ships, the ship can officially be placed, using the place ship method.
-        playerBoard->placeShip(startRow, endRow, startColumn, endColumn, playerShip, i);
-
     }
 }//end initialShipPlacement
 
@@ -242,7 +317,7 @@ void runTutorial()
     }
 
     //once the user has entered the points successfully, the ship is added to this location
-    board1->placeShip(7, 8, 'B', 'B', computer1, 2);
+    board1->placeShip(7, 8, 'B', 'B', computer1, 0);
 
     cls();
     board1->printBoard(1);
@@ -250,10 +325,10 @@ void runTutorial()
          "we'll go ahead and place your remaining ships." << endl << endl;
 
     //The tutorial demonstrates ship placement, by helping the user place one ship, and goes ahead and places the rest for them.
-    board1->placeShip(2, 2, 'D', 'F', computer1, 3);
-    board1->placeShip(0, 2, 'I', 'I', computer1, 3);
-    board1->placeShip(5, 5, 'B', 'E', computer1, 4);
-    board1->placeShip(8, 4, 'H', 'H', computer1, 5);
+    board1->placeShip(2, 2, 'D', 'F', computer1, 1);
+    board1->placeShip(0, 2, 'I', 'I', computer1, 2);
+    board1->placeShip(5, 5, 'B', 'E', computer1, 3);
+    board1->placeShip(4, 8, 'H', 'H', computer1, 4);
 
     pause();
     cls();
@@ -263,11 +338,11 @@ void runTutorial()
          "their ships.  We'll take care of that for you." << endl << endl;
 
     //The opponent's ships are placed on the respective board object
-    board2->placeShip(8, 8, 'H', 'G', computer2, 2);
-    board2->placeShip(7, 5, 'B', 'B', computer2, 3);
-    board2->placeShip(1, 3, 'H', 'H', computer2, 3);
-    board2->placeShip(0, 0, 'D', 'G', computer2, 4);
-    board2->placeShip(3, 7, 'J', 'J', computer2, 5);
+    board2->placeShip(8, 8, 'H', 'G', computer2, 0);
+    board2->placeShip(7, 5, 'B', 'B', computer2, 1);
+    board2->placeShip(1, 3, 'H', 'H', computer2, 2);
+    board2->placeShip(0, 0, 'D', 'G', computer2, 3);
+    board2->placeShip(3, 7, 'J', 'J', computer2, 4);
 
     pause();
     cls();
@@ -486,31 +561,35 @@ void printInstructions()
 
 }//end printInstructions
 
-void shipAnimation(int player){
+void shipAnimation(int player)
+{
 
     vector<string> lines;
-	ifstream file("ship.txt");
-	string str;
+    ifstream file("ship.txt");
+    string str;
 
-	while(std::getline(file, str)){
-		lines.push_back(str);
-	}
+    while(std::getline(file, str))
+    {
+        lines.push_back(str);
+    }
 
-	for(int j=0; j<44; j++){
-		for(int k=j; k>0; k--)
-			cout<<endl;
-		for(int i=0; i<lines.size(); i++){
-			cout<<lines[i]<<endl;
-		}
-		cout<< "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" <<endl;
+    for(int j=0; j<44; j++)
+    {
+        for(int k=j; k>0; k--)
+            cout<<endl;
+        for(int i=0; i<lines.size(); i++)
+        {
+            cout<<lines[i]<<endl;
+        }
+        cout<< "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" <<endl;
         if(player != 0)
             cout << "Player " << player << " wins!" << endl;
         else
-            cout << "YOU LOSE COMPUTER WINS" <<endl;
-		lines.pop_back();
-		sleep(100000);
-		cls();
-	}
+            cout << "YOU LOSE, COMPUTER WINS" <<endl;
+        lines.pop_back();
+        sleep(1000);
+        cls();
+    }
 }// end shipAnimation
 
 #endif
