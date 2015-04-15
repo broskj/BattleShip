@@ -49,6 +49,7 @@ int difficulty(void)
     {
         std::cout << "\t" << "1. Normal" << std::endl;
         std::cout << "\t" << "2. Hard" << std::endl;
+        std::cout << "\t" << "3. Impossible" << std::endl;
         std::cout << "choice - ";
         std::getline(std::cin, userinput);
 
@@ -56,6 +57,8 @@ int difficulty(void)
             return 0;
         else if(userinput.compare("2") == 0)
             return 1;
+        else if(userinput.compare("3") == 0)
+            return 2;
         else if(userinput.compare("") == 0)
         {
             cls();
