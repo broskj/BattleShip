@@ -60,7 +60,11 @@ public:
         for(int i = 0; i < MAX_SHIPS; i++)
             isSunk[i] = false;
 
-        if(difficulty == 0)
+        if(difficulty == -1)
+        {
+            //do nothing, PvP
+        }
+        else if(difficulty == 0)
         {
             nextRowGuess = rand() % 10;
             nextColGuess = rand() % 10;
@@ -80,6 +84,10 @@ public:
 
             nextRowGuess = rowPattern.back();
             nextColGuess = colPattern.back();
+        }
+        else if(difficulty == 2)
+        {
+            //do nothing
         }
         else
             std::cout << "Something happened Computer.h" << std::endl;
