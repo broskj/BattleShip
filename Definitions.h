@@ -70,9 +70,11 @@ void pause()
     while(ui.length() > 0);
     return;
 }
-void sleep(int millis)
+void sleep(unsigned millis)
 {
-    std::this_thread::sleep_for(std::chrono::milliseconds(millis));
+	clock_t time_end;
+    time_end = clock() + millis * CLOCKS_PER_SEC/1000;
+    while (clock() < time_end){}
 }
 
 #endif
