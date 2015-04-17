@@ -74,12 +74,36 @@ bool isValid(int startRow, int endRow, char startColumn, char endColumn, Player 
     return true;
 }//end isValid
 
+void tutorialCoordinate(int expectedRow, int expectedCol)
+{
+	std::string guess;
+
+	for(;;)
+	{
+		guess = "";
+		std::cout << "Enter coordinate for guess: ";
+		std::cin >> guess;
+		if (guess.length() != 2)
+		{
+			std::cout << "Invalid coordinate entered. Coordinates should be two characters long." << std::endl;
+			continue;
+		}
+		if(((guess.at(0)-'0') != expectedRow || (char)toupper(guess.at(1)) != (char)expectedCol))
+		{
+			std::cout << "Invalid coordinate entered. Enter " << expectedRow << (char)expectedCol << "." << std::endl;
+			continue;
+		}
+		return;
+	}
+	//this infinite loop executes until the coordinates are value.
+}
+
 void randomPlacement(Board *&playerBoard, Player *&playerShip)
 {
     /*
-     * method used for AI, as well as for the player should they choose
-     *  to use it.  uses random number generator to pick a starting point
-     *  and an orientation, and places a ship should the location be valid.
+     * method used for the player should they choose to use it.  uses random 
+     *  number generator to pick a starting point and an orientation, and 
+     *  places a ship should the location be valid.
      */
     int row = 0, size = 0, orientation = 0 /*Use 0 for vertical, 1 for horizontal*/;
     char col = 'A';
@@ -137,6 +161,68 @@ A:
     }
 }//end randomPlacement
 
+void randomPlacement(Board *&computerBoard, Computer *&computerShip)
+{
+    /*
+     * method used for AI.  uses random number generator to pick a starting point
+     *  and an orientation, and places a ship should the location be valid.
+     */
+    int row = 0, size = 0, orientation = 0 /*Use 0 for vertical, 1 for horizontal*/;
+    char col = 'A';
+
+
+    srand(time(NULL));
+    for(int i = 0; i < MAX_SHIPS; i++)
+    {
+        size = computerShip->getShipSize(i);
+        while(true)
+        {
+A:
+            orientation = rand() % 2; // random number between 0 and 1
+            row = rand() % 10; // random number between 0 and 9
+            if((row+size) > 9)
+                row -= size;
+            col = rand() % 10 + 'A'; // random number between 65 and 74 (A through J)
+            if((col+size) > 'J')
+                col -= size;
+
+            if(computerBoard->getIndex(row, col) != 0)
+                goto A;
+
+            /*
+             * row and col are starting coordinates.
+             * if orientation is vertical, then add ship size to row.
+             *  check that it's valid, then playerBoard->placeShip(row, row+-shipSize, col, col, playerShip, shipSize)
+             * else if orientation is horizontal, then add ship size to col.
+             *  check that it's valid, then playerBoard->placeShip(row, row, col, col+-shipSize, playerShip, shipSize)
+             */
+
+            if(orientation == 0)
+            {
+                if(isValid(row, row+size-1, col, col, computerShip, computerBoard, size) && rowWithinBounds(row+size-1))
+                {
+                    computerBoard->placeCShip(row, row+size-1, col, col, computerShip, i);
+                    break;
+                }
+                else
+                    goto A;
+            }
+            else if(orientation == 1)
+            {
+                if(isValid(row, row, col, col+size-1, computerShip, computerBoard, size) && colWithinBounds(col+size-1))
+                {
+                    computerBoard->placeCShip(row, row, col, col+size-1, computerShip, i);
+                    break;
+                }
+                else
+                    goto A;
+            }
+            else
+                pause();
+        }
+    }
+}//end randomPlacement
+
 void initialShipPlacement(Board *&playerBoard, Player *&playerShip)
 {
     //This method is used to do the initial ship placement for each player, at the start of the game
@@ -148,7 +234,7 @@ void initialShipPlacement(Board *&playerBoard, Player *&playerShip)
     char endColumn = 'A';
     string buffer;
     bool flag = false;
-
+    
     cout << "Would you like to place your own ships? [y/n]" << endl;
     cin >> buffer;
 
@@ -156,81 +242,79 @@ void initialShipPlacement(Board *&playerBoard, Player *&playerShip)
         randomPlacement(playerBoard, playerShip);
     else
     {
+		for(int i = 0; i < MAX_SHIPS; i++)
+		{
+			//a for loop is used to iterate through the number of ships that needs to be placed
 
+			do
+			{
+				if(!flag)
+				{
+					if(i != 0)
+						cls();
+					playerBoard->printBoard(1);
+					//The player's board is printed, so they can see where they would like to place their ships
+				}
 
-        for(int i = 0; i < MAX_SHIPS; i++)
-        {
-            //a for loop is used to iterate through the number of ships that needs to be placed
+				//Each player is prompted to enter the starting coordinate of the ship
+				cout << "Enter starting coordinate for ship of size " << playerShip->getShipSize(i) << " " << "\n";
+				cin >> startRow;
 
-            do
-            {
-                if(!flag)
-                {
-                    if(i != 0)
-                        cls();
-                    playerBoard->printBoard(1);
-                    //The player's board is printed, so they can see where they would like to place their ships
-                }
+				//This loop is used to continually ask the user for a correct input value, if an incorrect value is entered.
+				while (!rowWithinBounds(startRow))
+				{
+					cout << "Invalid entry, row must be between 0 and 9." << endl;
+					cin >> startRow;
+				}
 
-                //Each player is prompted to enter the starting coordinate of the ship
-                cout << "Enter starting coordinate for ship of size " << playerShip->getShipSize(i) << " " << "\n";
-                cin >> startRow;
+				//The char that they entered is converted to an uppercase letter, in case they entered a lowercase letter.
+				cin >> startColumn;
+				startColumn = toupper(startColumn);
 
-                //This loop is used to continually ask the user for a correct input value, if an incorrect value is entered.
-                while (!rowWithinBounds(startRow))
-                {
-                    cout << "Invalid entry, row must be between 0 and 9." << endl;
-                    cin >> startRow;
-                }
+				//This loop is used to continually ask the user for a correct input value, if an incorrect value is entered.
+				while(!colWithinBounds(startColumn))
+				{
+					cout << "Invalid entry, column must be between A and J." << endl;
+					cin >> startColumn;
+					startColumn = toupper(startColumn);
+				}
 
-                //The char that they entered is converted to an uppercase letter, in case they entered a lowercase letter.
-                cin >> startColumn;
-                startColumn = toupper(startColumn);
+				//Then the player is prompted for the ending coordinate of the ship
+				cout << "Enter ending coordinate for ship of size " << playerShip->getShipSize(i) << " " << endl;
+				cin >> endRow;
 
-                //This loop is used to continually ask the user for a correct input value, if an incorrect value is entered.
-                while(!colWithinBounds(startColumn))
-                {
-                    cout << "Invalid entry, column must be between A and J." << endl;
-                    cin >> startColumn;
-                    startColumn = toupper(startColumn);
-                }
+				//The loop checks and prompts the user until a valid input is given.
+				while(!rowWithinBounds(endRow))
+				{
+					cout << "Invalid entry, row must be between 0 and 9." << endl;
+					cin >> endRow;
+				}
 
-                //Then the player is prompted for the ending coordinate of the ship
-                cout << "Enter ending coordinate for ship of size " << playerShip->getShipSize(i) << " " << endl;
-                cin >> endRow;
+				//Finally, the user is prompted to enter the ending column of the ship
+				cin >> endColumn;
 
-                //The loop checks and prompts the user until a valid input is given.
-                while(!rowWithinBounds(endRow))
-                {
-                    cout << "Invalid entry, row must be between 0 and 9." << endl;
-                    cin >> endRow;
-                }
+				//The char that they entered is converted to an uppercase letter, in case they entered a lowercase letter.
+				endColumn = toupper(endColumn);
 
-                //Finally, the user is prompted to enter the ending column of the ship
-                cin >> endColumn;
+				//Again, this loop is used to continually ask the user for a correct input value, if an incorrect value is entered.
+				while(!colWithinBounds(endColumn))
+				{
+					cout << "Invalid entry, column must be between A and J." << endl;
+					cin >> endColumn;
+					endColumn = toupper(endColumn);
+				}
 
-                //The char that they entered is converted to an uppercase letter, in case they entered a lowercase letter.
-                endColumn = toupper(endColumn);
+				//flag used to indicate incorrect ship size, position, etc.
+				flag = !isValid(startRow, endRow, startColumn, endColumn, playerShip, playerBoard, playerShip->getShipSize(i));
 
-                //Again, this loop is used to continually ask the user for a correct input value, if an incorrect value is entered.
-                while(!colWithinBounds(endColumn))
-                {
-                    cout << "Invalid entry, column must be between A and J." << endl;
-                    cin >> endColumn;
-                    endColumn = toupper(endColumn);
-                }
+			}
+			while(flag);
 
-                //flag used to indicate incorrect ship size, position, etc.
-                flag = !isValid(startRow, endRow, startColumn, endColumn, playerShip, playerBoard, playerShip->getShipSize(i));
+			//once the user has sucessfully entered the columns and rows for their ships, the ship can officially be placed, using the place ship method.
+			playerBoard->placeShip(startRow, endRow, startColumn, endColumn, playerShip, i);
 
-            }
-            while(flag);
-
-            //once the user has sucessfully entered the columns and rows for their ships, the ship can officially be placed, using the place ship method.
-            playerBoard->placeShip(startRow, endRow, startColumn, endColumn, playerShip, i);
-
-        }
-    }
+		}
+	}
 }//end initialShipPlacement
 
 //This is a tuturial that shows the users how to play the game. It is an option on the menu
@@ -245,13 +329,6 @@ void runTutorial()
     Player *computer1 = new Player;
     Player *computer2 = new Player;
 
-    int startRow = 0;
-    int endRow = 0;
-    int fireRow = 0;
-    char startCol = 'A';
-    char endCol = 'A';
-    char fireCol = 'A';
-
     //The tutorial begins to walk the player step by step on how to play the game
     cout << "Welcome to the tutorial!" << endl;
     cout << "First, let's begin by placing your ships." << endl << endl;
@@ -265,56 +342,15 @@ void runTutorial()
     cout << "Our first ship is of size 2.  You'll need to first enter your ship's\n" <<
          "starting coordinate.\nEnter '7B'."<< endl;
 
-    cin >> startRow;
-
-    //until the user enters these predetermined coordinates correctly, the loop conntinues
-    while(startRow != 7)
-    {
-        cout << "That's not the right row, enter '7'." << endl;
-        cin >> startRow;
-    }
-
-    //The user is prompted to enter the starting column to place a ship in a predetermined location
-    //cout << "Enter 'B' for the column." << endl;
-    cin >> startCol;
-
-    startCol = toupper(startCol);
-
-    //until the user enters these predetermined coordinates correctly, the loop conntinues
-    while(startCol != 'B')
-    {
-        cout << "That's not the right column, enter 'B'." << endl;
-        cin >> startCol;
-        startCol = toupper(startCol);
-    }
-
+	tutorialCoordinate(7, 'B');
+	
     cls();
     board1->printBoard(1);
 
     //The user is prompted to enter the ending row to place a ship in a predetermined location
     cout << "Now you'll enter the ship's ending coordinate.\nEnter '8B'." << endl;
-    cin >> endRow;
-
-    //until the user enters these predetermined coordinates correctly, the loop conntinues
-    while(endRow != 8)
-    {
-        cout << "That's not the right row, enter '8'." << endl;
-        cin >> endRow;
-    }
-
-    //The user is prompted to enter the ending column to place a ship in a predetermined location
-    //cout << "Enter 'B' for the column." << endl;
-    cin >> endCol;
-
-    endCol = toupper(endCol);
-
-    //until the user enters these predetermined coordinates correctly, the loop conntinues
-    while(endCol != 'B')
-    {
-        cout << "That's not the right column, enter 'B'." << endl;
-        cin >> endCol;
-        endCol = toupper(endCol);
-    }
+    
+    tutorialCoordinate(8, 'B');
 
     //once the user has entered the points successfully, the ship is added to this location
     board1->placeShip(7, 8, 'B', 'B', computer1, 0);
@@ -328,7 +364,7 @@ void runTutorial()
     board1->placeShip(2, 2, 'D', 'F', computer1, 1);
     board1->placeShip(0, 2, 'I', 'I', computer1, 2);
     board1->placeShip(5, 5, 'B', 'E', computer1, 3);
-    board1->placeShip(4, 8, 'H', 'H', computer1, 4);
+    board1->placeShip(8, 4, 'H', 'H', computer1, 4);
 
     pause();
     cls();
@@ -361,25 +397,8 @@ void runTutorial()
          " 2B." << endl << endl;
 
     //This stage of the tutorial takes the user through how to enter points to guess a ship
-
-    cin >> fireRow;
-
-    while(fireRow != 2)
-    {
-        cout << "That's not the right row, enter '2'." << endl;
-        cin >> fireRow;
-    }
-
-    cin >> fireCol;
-    fireCol = toupper(fireCol);
-
-    while(fireCol != 'B')
-    {
-        cout << "That's not the right column, enter 'B'." << endl;
-        cin >> fireCol;
-        fireCol = toupper(fireCol);
-    }
-
+	tutorialCoordinate(2, 'B');
+	
     board2->checkGuess(2, convertColumn('B'), computer2);
     cout << endl;
     pause();
@@ -452,25 +471,9 @@ void runTutorial()
     board1->printBoard(1);
 
     cout << "Okay!  The enemy now has one ship left.  Sink it by firing at 7J." << endl;
-
-    cin >> fireRow;
-
-    while(fireRow != 7)
-    {
-        cout << "That's not the right row, enter '7'." << endl;
-        cin >> fireRow;
-    }
-
-    cin >> fireCol;
-    fireCol = toupper(fireCol);
-
-    while(fireCol != 'J')
-    {
-        cout << "That's not the right column, enter 'J'." << endl;
-        cin >> fireCol;
-        fireCol = toupper(fireCol);
-    }
-
+    
+    tutorialCoordinate(7, 'J');
+    
     board2->checkGuess(7, convertColumn('J'), computer2);
     cout << endl;
     pause();
@@ -561,7 +564,7 @@ void printInstructions()
 
 }//end printInstructions
 
-void shipAnimation(int player)
+/*void shipAnimation(int player)
 {
 
     vector<string> lines;
@@ -590,6 +593,6 @@ void shipAnimation(int player)
         sleep(1000);
         cls();
     }
-}// end shipAnimation
+}// end shipAnimation*/
 
 #endif
