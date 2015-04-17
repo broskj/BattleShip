@@ -67,12 +67,13 @@ public:
 
                 cout << i << "\t\b\b\b\b";
 
-                /*A note about the code system: Code 0 means that there is no ship placed here, and it has not been guessed yet.
-                When the board is printed, 0 is printed as a "~", to emulate the waves in the ocean.
-                Code 1 means that There is a ship in this location that has not yet been hit. When printed, it is printed as an "S".
-                Code 2 means that there is no ship in this location, but that this location has been guessed. When printed, it is printed as an "O".
-                Code 3 means that there is a ship in this location that has already been hit. When printed, it is printed as an "X".
-                */
+                /*
+                 * A note about the code system: Code 0 means that there is no ship placed here, and it has not been guessed yet.
+                 *  When the board is printed, 0 is printed as a "~", to emulate the waves in the ocean.
+                 *  Code 1 means that There is a ship in this location that has not yet been hit. When printed, it is printed as an "S".
+                 *  Code 2 means that there is no ship in this location, but that this location has been guessed. When printed, it is printed as an "O".
+                 *  Code 3 means that there is a ship in this location that has already been hit. When printed, it is printed as an "X".
+                 */
 
                 for(int j = 0; j < COLUMNS; j++)
                 {
@@ -331,7 +332,7 @@ public:
         }
         //this infinite loop executes until the coordinates are value.
 
-    }//end takeInGuess
+    }//end takeInCGuess
 
     int checkCGuess(int row, int column, Computer *computer)
     {
