@@ -30,26 +30,9 @@ void quickPlacement(Board *&playerBoard, Player *&playerShip)
     playerBoard->placeShip(8, 4, 'H', 'H', playerShip, 4);
 }//end quickPlacement
 
-void qempty(std::queue<int> &q)
-{
-    std::queue<int> empty;
-    std::swap(q, empty );
-    return;
-}
-
-void qprint(std::queue<int> &q)
-{
-    while (!q.empty())
-    {
-        int _t = q.front();
-        std::cout << _t << std::endl;
-        q.pop();
-    }
-    return;
-}
-
 bool playerTurn(Board *playerOne, Board *playerTwo, Player *playerShip, int player)
 {
+    cin.clear();
     cls();
 
     //Signals that it is player 1's turn
@@ -67,6 +50,7 @@ bool playerTurn(Board *playerOne, Board *playerTwo, Player *playerShip, int play
     //takes in player 1's guess about player 2's board.
     playerTwo->takeInGuess(playerShip);
 
+    cin.clear();
     //checks for win (all ships sunk)
     if(playerTwo->checkGameOver() == 1)
     {
@@ -81,6 +65,7 @@ bool playerTurn(Board *playerOne, Board *playerTwo, Player *playerShip, int play
 
 bool playerTurn(Board *playerOne, Board *playerTwo, Computer *computerShip, int player)
 {
+    cin.clear();
     cls();
 
     //Signals that it is player 1's turn
@@ -98,6 +83,7 @@ bool playerTurn(Board *playerOne, Board *playerTwo, Computer *computerShip, int 
     //takes in player 1's guess about player 2's board.
     playerTwo->takeInCGuess(computerShip);
 
+    cin.clear();
     //checks for win (all ships sunk)
     if(playerTwo->checkGameOver() == 1)
     {
@@ -110,9 +96,9 @@ bool playerTurn(Board *playerOne, Board *playerTwo, Computer *computerShip, int 
     return false;
 }//end playerTurn
 
-bool computerTurn(Board *playerBoard, Player *playerShip, Computer *compShip)
+bool computerTurn(Board *playerBoard, Computer *compShip, Player *playerShip)
 {
-    bool flag = false;
+    cin.clear();
     int row, col;
     //for all hits, change to
     //while(playerBoard->getIndex(row, convertColumn(col)) != 1) ...
@@ -125,109 +111,109 @@ bool computerTurn(Board *playerBoard, Player *playerShip, Computer *compShip)
             row = rand() % 10;
             col = rand() % 10;
         }
+        pause();
+		cout << "The computer is firing at " << row << (char)(col+'A') << endl;
+		pause();
+        playerBoard->checkGuess(row, col, playerShip);
+        
+        if(playerBoard->checkGameOver() == 1)
+		{
+			cout << "You lost!" << endl;
+			pause();
+			return true;
+		}
+		return false;
     }
-    else
-    {
-        if (compShip->nextRows.size() == 0)
-        {
-            row = compShip->nextRowGuess;
-            col = compShip->nextColGuess;
-            while(playerBoard->getIndex(row, col) == 2 ||
-                    playerBoard->getIndex(row, col) == 3)
-            {
-                compShip->findNextCoordinates();
-                row = compShip->nextRowGuess;
-                col = compShip->nextColGuess;
-            }
-        }
-        else
-        {
-            flag = true;
-            row = compShip->nextRows.front();
-            compShip->nextRows.pop();
-            col = compShip->nextCols.front();
-            compShip->nextCols.pop();
-        }
-    }
+    
+	if (compShip->dcount == 0) /* Not currently firing at a ship */
+	{
+		row = compShip->nextRowGuess;
+		col = compShip->nextColGuess;
+		while(playerBoard->getIndex(row, col) == 2 ||
+				playerBoard->getIndex(row, col) == 3)
+		{
+			compShip->findNextCoordinates();
+			row = compShip->nextRowGuess;
+			col = compShip->nextColGuess;
+		}
+	} else { /* Continue to fire at the ship we're firing at */
+		row = compShip->nextRows.front();
+		if (row == -1) { 
+			compShip->nextRows.pop(); 
+			compShip->nextCols.pop(); 
+			row = compShip->nextRows.front();
+		}
+		
+		compShip->nextRows.pop();
+		col = compShip->nextCols.front();
+		compShip->nextCols.pop();
+		
+	}
+	
     pause();
     cout << "The computer is firing at " << row << (char)(col+'A') << endl;
     pause();
+    
     int shipfound = playerBoard->checkGuess(row, col, playerShip);
-    if(shipfound >= 0)
+    if (shipfound >= 0) /* Sink */
     {
-        qempty(compShip->nextRows);
-        qempty(compShip->nextCols);
-        flag = false;
+        compShip->qempty(compShip->nextRows);
+        compShip->qempty(compShip->nextCols);
+        compShip->dflag = false;
+        compShip->dcount = 0;
+        //cout << "Found " << compShip->getShipName(shipfound) << endl;
     }
-    else if (shipfound == -1)
+    else if (shipfound == -1) // Hit
     {
-        if(flag)
+        if(compShip->dcount != 0) /* We're already targeting a ship. */
         {
+            compShip->dflag = true;
         }
-        else
+        else /* Set up for targeting a ship */
         {
-            /* Debug */
-            std::queue<int> deb;
+			compShip->dcount = 4;
             /* North */
             for (int i = 1; i < 5; ++i)
             {
-                if ((row - i) < 0)
-                {
-                    break;
-                }
+                if ((row - i) < 0) { break; }
                 compShip->nextRows.push(row - i);
-                deb.push(row - i);
                 compShip->nextCols.push(col);
             }
             compShip->nextRows.push(-1);
-            deb.push(-1);
             compShip->nextCols.push(-1);
             /* East */
             for (int i = 1; i < 5; ++i)
             {
-                if ((col + i) > 9)
-                {
-                    break;
-                }
+                if ((col + i) > 9) { break; }
                 compShip->nextRows.push(row);
-                deb.push(row);
                 compShip->nextCols.push(col + i);
             }
             compShip->nextRows.push(-1);
-            deb.push(-1);
             compShip->nextCols.push(-1);
             /* South */
             for (int i = 1; i < 5; ++i)
             {
-                if ((row + i) > 9)
-                {
-                    break;
-                }
+                if ((row + i) > 9) { break; }
                 compShip->nextRows.push(row + i);
-                deb.push(row + i);
                 compShip->nextCols.push(col);
             }
             compShip->nextRows.push(-1);
-            deb.push(-1);
             compShip->nextCols.push(-1);
             /* West */
             for (int i = 1; i < 5; ++i)
             {
-                if ((col - i) < 0)
-                {
-                    break;
-                }
+                if ((col - i) < 0) { break; }
                 compShip->nextRows.push(row);
-                deb.push(row);
                 compShip->nextCols.push(col - i);
             }
+            
 
-            //qprint(deb);
         }
     }
-    else
+    else /* Miss */
     {
         compShip->findNextCoordinates();
+        
     }
     pause();
     if(playerBoard->checkGameOver() == 1)
@@ -238,69 +224,6 @@ bool computerTurn(Board *playerBoard, Player *playerShip, Computer *compShip)
     }
     return false;
 }//end computerTurn
-
-void randomPlacement(Board *&computerBoard, Computer *&computerShip)
-{
-    /*
-     * method used for AI, as well as for the player should they choose
-     *  to use it.  uses random number generator to pick a starting point
-     *  and an orientation, and places a ship should the location be valid.
-     */
-    int row = 0, size = 0, orientation = 0 /*Use 0 for vertical, 1 for horizontal*/;
-    char col = 'A';
-
-
-    srand(time(NULL));
-    for(int i = 0; i < MAX_SHIPS; i++)
-    {
-        size = computerShip->getShipSize(i);
-        while(true)
-        {
-A:
-            orientation = rand() % 2; // random number between 0 and 1
-            row = rand() % 10; // random number between 0 and 9
-            if((row+size) > 9)
-                row -= size;
-            col = rand() % 10 + 'A'; // random number between 65 and 74 (A through J)
-            if((col+size) > 'J')
-                col -= size;
-
-            if(computerBoard->getIndex(row, col) != 0)
-                goto A;
-
-            /*
-             * row and col are starting coordinates.
-             * if orientation is vertical, then add ship size to row.
-             *  check that it's valid, then playerBoard->placeShip(row, row+-shipSize, col, col, playerShip, shipSize)
-             * else if orientation is horizontal, then add ship size to col.
-             *  check that it's valid, then playerBoard->placeShip(row, row, col, col+-shipSize, playerShip, shipSize)
-             */
-
-            if(orientation == 0)
-            {
-                if(isValid(row, row+size-1, col, col, computerShip, computerBoard, size) && rowWithinBounds(row+size-1))
-                {
-                    computerBoard->placeCShip(row, row+size-1, col, col, computerShip, i);
-                    break;
-                }
-                else
-                    goto A;
-            }
-            else if(orientation == 1)
-            {
-                if(isValid(row, row, col, col+size-1, computerShip, computerBoard, size) && colWithinBounds(col+size-1))
-                {
-                    computerBoard->placeCShip(row, row, col, col+size-1, computerShip, i);
-                    break;
-                }
-                else
-                    goto A;
-            }
-            else
-                pause();
-        }
-    }
-}//end randomPlacement
 
 bool playGame(int mode, int difficulty)
 {
@@ -320,11 +243,11 @@ bool playGame(int mode, int difficulty)
      * The following code is executed for both PVP and PVC games
      */
 
-    cls();
     //Signals for player 1 to place his/her ships
     cout << "Player 1, it is time to place your ships!" << endl;
     //calls the initialShipPlacement method, to properly place the ships
     initialShipPlacement(playerOne, player1);
+    //randomPlacement(playerOne, player1);
     //quickPlacement(playerOne, player1);
     //clears the screen between each player's turn, so that neither have an unfair advantage over the other.
     cls();
@@ -340,7 +263,6 @@ bool playGame(int mode, int difficulty)
      *  the player.  The game exits when either the user or the player has no
      *  ships left.
      */
-    cout << mode << endl;
     switch(mode)
     {
     case 0:  //PVP
@@ -366,10 +288,16 @@ bool playGame(int mode, int difficulty)
         break;
     case 1:  //PVC
         //Signals for player 2 to place his/her ships
-        cout << "The computer is now placing its ships." << endl;
         //calls the randomPlacement method to randomly place ships
         //randomPlacement(playerTwo, player2);
         //quickPlacement(playerTwo, player2);
+        for(int i = 3; i > 0; i--)
+		{
+			if(i == 0)
+				cout << "The computer is now placing its ships";
+			cout << ". ";
+			sleep(1000);
+		}
         randomPlacement(playerTwo, computer1);
 
         /*
@@ -380,7 +308,7 @@ bool playGame(int mode, int difficulty)
         {
             if(playerTurn(playerOne, playerTwo, computer1, 1))
                 return true;
-            if(computerTurn(playerOne, player1, computer1))
+            if(computerTurn(playerOne, computer1, player1))
                 return true;
         }
         break;
