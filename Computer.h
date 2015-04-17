@@ -16,12 +16,28 @@ public:
     std::string *names;
     bool *isSunk;
     int **rows;
-    int ** cols;
+    int **cols;
     int nextRowGuess;
     int nextColGuess;
     int difficulty;
     bool lastWasHit;
+    int dcount;
+    bool dflag;
 
+	void qempty(std::queue<int> &q)
+	{
+    std::queue<int>().swap(q);
+    return;
+}
+
+	void qprint(std::queue<int> &q)
+	{
+    while (!q.empty()) {
+        q.pop();
+    }
+    return;
+}
+    
     Computer(int mode)
     {
         lastWasHit = false;
@@ -32,6 +48,8 @@ public:
         cols = new int *[MAX_SHIPS];
         names = new std::string[MAX_SHIPS];
         isSunk = new bool [MAX_SHIPS];
+        dcount = 0;
+        dflag = false;
 
         names[0] = std::string("Destroyer"); /* size 2 */
         names[1] = std::string("Submarine"); /* size 3 */
@@ -59,7 +77,6 @@ public:
 
         for(int i = 0; i < MAX_SHIPS; i++)
             isSunk[i] = false;
-
         if(difficulty == -1)
         {
             //do nothing, PvP
@@ -87,8 +104,8 @@ public:
         }
         else if(difficulty == 2)
         {
-            //do nothing
-        }
+			//do nothing, impossible mode
+		}
         else
             std::cout << "Something happened Computer.h" << std::endl;
     }//end Computer
@@ -146,60 +163,74 @@ public:
         return false;
     }//end sunk
 
+	void changeDirection(void)
+	{
+		int s = this->nextRows.front();
+		while(s != -1) {
+			std::cout << "Debug: row = " << s << std::endl;
+			this->nextRows.pop();
+			this->nextCols.pop();
+			s = this->nextRows.front();
+		}
+		std::cout << "Found -1" << std::endl;
+		std::cout << "Debug: row = " << this->nextRows.front() << std::endl;
+		this->nextRows.pop();
+		this->nextCols.pop();
+		std::cout << "Removed -1" << std::endl;
+		std::cout << "Debug: row = " << this->nextRows.front() << std::endl;
+	}
+	
     void findNextCoordinates(void)
     {
-        if(difficulty == 1)
-        {
-            nextRowGuess = rowPattern.back();
-            nextColGuess = colPattern.back();
-        } else
+        if(difficulty == 0)
         {
             nextRowGuess = rand() % 10;
             nextColGuess = rand() % 10;
-        }
-        if (nextRows.size() == 0)
+        } 
+        else if(difficulty == 1)
         {
+            nextRowGuess = rowPattern.back();
+            nextColGuess = colPattern.back();
+		}
+        if (dcount == 0 && difficulty == 1) { 
+			// We're actually going to use the stored values, so pop them
+			// so that we have fresh ones next time.
             rowPattern.pop_back();
             colPattern.pop_back();
             return;
         }
 
-        int s = 0;
-        if (nextRows.size() < 14)   /* In East, skip South */
-        {
-            /* Removes all of East */
-            s = nextRows.front();
-            while (s != -1)
-            {
-                nextRows.pop();
-                nextCols.pop();
-                s = nextRows.front();
-            }
-            nextRows.pop();
-            nextCols.pop();
+        switch (dcount) {
+        case 4:
+            if (dflag) { // We got a hit going North, so let's switch to South.
+                /* Remove (what's effectively East) */
+                std::cout << "Removing East" << std::endl;
+                this->changeDirection();
+            } // Now remove (effectively the remaining North coords)
+            std::cout << "Removing North" << std::endl;
+            this->changeDirection();
+            return;
+        case 3:
+            if (dflag) { // We got a hit going East, so let's switch to West.
+                /* Remove (what's effectively South) */
+                this->changeDirection();
+            }// Now remove (effectively the remaining East coords)
+            this->changeDirection();
+            return;
+        case 2: // No hits going South, so let's switch to West.
+            // Now remove (effectively the remaining South coords)
+            if (!dflag) {
+				this->changeDirection();
+			} else {
+				this->qempty(this->nextRows);
+				this->qempty(this->nextCols);
+			}
+        default:
+			this->qempty(this->nextRows);
+			this->qempty(this->nextCols);
+            return;
         }
-        else if (nextRows.size() < 19)     /* At least one hit north so remove North and East */
-        {
-            /* Removes all of North */
-            s = nextRows.front();
-            while (s != -1)
-            {
-                nextRows.pop();
-                nextCols.pop();
-                s = nextRows.front();
-            }
-            nextRows.pop();
-            nextCols.pop();
-        } /* Otherwise, try East and remove just North */
-        s = nextRows.front();
-        while (s != -1)
-        {
-            nextRows.pop();
-            nextCols.pop();
-            s = nextRows.front();
-        }
-        nextRows.pop();
-        nextCols.pop();
+
         return;
     }//end findNextCoordinates
 
