@@ -37,7 +37,7 @@ public:
     }
     return;
 }
-    
+
     Computer(int mode)
     {
         lastWasHit = false;
@@ -179,20 +179,28 @@ public:
 		std::cout << "Removed -1" << std::endl;
 		std::cout << "Debug: row = " << this->nextRows.front() << std::endl;
 	}
-	
+
     void findNextCoordinates(void)
     {
         if(difficulty == 0)
         {
             nextRowGuess = rand() % 10;
             nextColGuess = rand() % 10;
-        } 
+        }
         else if(difficulty == 1)
         {
-            nextRowGuess = rowPattern.back();
-            nextColGuess = colPattern.back();
+            if(rowPattern.size() > 0)
+            {
+                nextRowGuess = rowPattern.back();
+                nextColGuess = colPattern.back();
+            }
+            else
+            {
+                nextRowGuess = rand() % 10;
+                nextColGuess = rand() % 10;
+            }
 		}
-        if (dcount == 0 && difficulty == 1) { 
+        if (dcount == 0 && difficulty == 1) {
 			// We're actually going to use the stored values, so pop them
 			// so that we have fresh ones next time.
             rowPattern.pop_back();
