@@ -101,8 +101,8 @@ void tutorialCoordinate(int expectedRow, int expectedCol)
 void randomPlacement(Board *&playerBoard, Player *&playerShip)
 {
     /*
-     * method used for the player should they choose to use it.  uses random 
-     *  number generator to pick a starting point and an orientation, and 
+     * method used for the player should they choose to use it.  uses random
+     *  number generator to pick a starting point and an orientation, and
      *  places a ship should the location be valid.
      */
     int row = 0, size = 0, orientation = 0 /*Use 0 for vertical, 1 for horizontal*/;
@@ -234,7 +234,7 @@ void initialShipPlacement(Board *&playerBoard, Player *&playerShip)
     char endColumn = 'A';
     string buffer;
     bool flag = false;
-    
+
     cout << "Would you like to place your own ships? [y/n]" << endl;
     cin >> buffer;
 
@@ -343,13 +343,13 @@ void runTutorial()
          "starting coordinate.\nEnter '7B'."<< endl;
 
 	tutorialCoordinate(7, 'B');
-	
+
     cls();
     board1->printBoard(1);
 
     //The user is prompted to enter the ending row to place a ship in a predetermined location
     cout << "Now you'll enter the ship's ending coordinate.\nEnter '8B'." << endl;
-    
+
     tutorialCoordinate(8, 'B');
 
     //once the user has entered the points successfully, the ship is added to this location
@@ -398,7 +398,7 @@ void runTutorial()
 
     //This stage of the tutorial takes the user through how to enter points to guess a ship
 	tutorialCoordinate(2, 'B');
-	
+
     board2->checkGuess(2, convertColumn('B'), computer2);
     cout << endl;
     pause();
@@ -471,9 +471,9 @@ void runTutorial()
     board1->printBoard(1);
 
     cout << "Okay!  The enemy now has one ship left.  Sink it by firing at 7J." << endl;
-    
+
     tutorialCoordinate(7, 'J');
-    
+
     board2->checkGuess(7, convertColumn('J'), computer2);
     cout << endl;
     pause();
