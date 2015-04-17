@@ -1,7 +1,7 @@
 /*
  TODO:
     -Consider adding tally beside each board listing which ships are afloat
- *///testing
+ */
 
 #include "Methods.h"
 #include "Game.h"
