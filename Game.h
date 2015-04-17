@@ -4,6 +4,11 @@
 #include "Computer.h"
 using namespace std;
 
+/*
+ *TODO:
+ * if AI gets a hit, check that places in the pattern haven't been guessed already.
+ */
+
 void switchingBoards()
 {
     pause();
@@ -115,7 +120,7 @@ bool computerTurn(Board *playerBoard, Computer *compShip, Player *playerShip)
 		cout << "The computer is firing at " << row << (char)(col+'A') << endl;
 		pause();
         playerBoard->checkGuess(row, col, playerShip);
-        
+
         if(playerBoard->checkGameOver() == 1)
 		{
 			cout << "You lost!" << endl;
@@ -124,7 +129,7 @@ bool computerTurn(Board *playerBoard, Computer *compShip, Player *playerShip)
 		}
 		return false;
     }
-    
+
 	if (compShip->dcount == 0) /* Not currently firing at a ship */
 	{
 		row = compShip->nextRowGuess;
@@ -138,22 +143,22 @@ bool computerTurn(Board *playerBoard, Computer *compShip, Player *playerShip)
 		}
 	} else { /* Continue to fire at the ship we're firing at */
 		row = compShip->nextRows.front();
-		if (row == -1) { 
-			compShip->nextRows.pop(); 
-			compShip->nextCols.pop(); 
+		if (row == -1) {
+			compShip->nextRows.pop();
+			compShip->nextCols.pop();
 			row = compShip->nextRows.front();
 		}
-		
+
 		compShip->nextRows.pop();
 		col = compShip->nextCols.front();
 		compShip->nextCols.pop();
-		
+
 	}
-	
+
     pause();
     cout << "The computer is firing at " << row << (char)(col+'A') << endl;
     pause();
-    
+
     int shipfound = playerBoard->checkGuess(row, col, playerShip);
     if (shipfound >= 0) /* Sink */
     {
@@ -206,14 +211,14 @@ bool computerTurn(Board *playerBoard, Computer *compShip, Player *playerShip)
                 compShip->nextRows.push(row);
                 compShip->nextCols.push(col - i);
             }
-            
+
 
         }
     }
     else /* Miss */
     {
         compShip->findNextCoordinates();
-        
+
     }
     pause();
     if(playerBoard->checkGameOver() == 1)
@@ -243,6 +248,7 @@ bool playGame(int mode, int difficulty)
      * The following code is executed for both PVP and PVC games
      */
 
+    cls();
     //Signals for player 1 to place his/her ships
     cout << "Player 1, it is time to place your ships!" << endl;
     //calls the initialShipPlacement method, to properly place the ships
@@ -291,10 +297,9 @@ bool playGame(int mode, int difficulty)
         //calls the randomPlacement method to randomly place ships
         //randomPlacement(playerTwo, player2);
         //quickPlacement(playerTwo, player2);
+        cout << "The computer is now placing its ships";
         for(int i = 3; i > 0; i--)
 		{
-			if(i == 0)
-				cout << "The computer is now placing its ships";
 			cout << ". ";
 			sleep(1000);
 		}
