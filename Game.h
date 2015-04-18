@@ -55,8 +55,10 @@ bool playerTurn(Board *playerOne, Board *playerTwo, Player *playerShip, int play
     //checks for win (all ships sunk)
     if(playerTwo->checkGameOver() == 1)
     {
+        pause();
         shipAnimation(player);
         pause();
+        cls();
         return true;
         //if all ships have been sunk, the value of true is returned.
     }
@@ -88,8 +90,10 @@ bool playerTurn(Board *playerOne, Board *playerTwo, Computer *computerShip, int 
     //checks for win (all ships sunk)
     if(playerTwo->checkGameOver() == 1)
     {
+        pause();
         shipAnimation(player);
         pause();
+        cls();
         return true;
         //if all ships have been sunk, the value of true is returned.
     }
@@ -119,8 +123,10 @@ bool computerTurn(Board *playerBoard, Computer *compShip, Player *playerShip)
 
         if(playerBoard->checkGameOver() == 1)
 		{
+            pause();
 			shipAnimation(0);
 			pause();
+			cls();
 			return true;
 		}
 		return false;
@@ -264,8 +270,10 @@ A:
     pause();
     if(playerBoard->checkGameOver() == 1)
     {
+        pause();
         shipAnimation(0);
         pause();
+        cls();
         return true;
     }
     return false;
