@@ -134,15 +134,20 @@ public:
 
     void takeInGuess(Player *player)
     {
-
         std::string guess;
+        int row, col;
 
         for(;;)
         {
             guess = "";
             std::cout << "Enter coordinate for guess: ";
             std::cin >> guess;
-            if (guess.length() != 2)
+            if(guess.compare("rand") == 0)
+            {
+                checkGuess(rand() % 10, rand() % 10, player);
+                break;
+            }
+            else if (guess.length() != 2)
             {
                 std::cout << "Invalid coordinate entered. Coordinates should be two characters long." << std::endl;
                 continue;
@@ -267,7 +272,12 @@ public:
             guess = "";
             std::cout << "Enter coordinate for guess: ";
             std::cin >> guess;
-            if (guess.length() != 2)
+            if(guess.compare("rand") == 0)
+            {
+                checkGuess(rand() % 10, rand() % 10, computer);
+                break;
+            }
+            else if (guess.length() != 2)
             {
                 std::cout << "Invalid coordinate entered. Coordinates should be two characters long." << std::endl;
                 continue;
