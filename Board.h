@@ -1,9 +1,3 @@
-/*
- * TODO:
- *	-standardize input corrections between initialShipPlacement() and
- *		takeInGuess.
- */
-
 #ifndef BOARD_H_
 #define BOARD_H_
 
@@ -21,6 +15,7 @@ const int COLUMNS = 10;
 //Converts the column to its corresponding integer value in the array
 int convertColumn(char column);
 
+//Board class - holds 2D array that represents a player's board
 class Board
 {
 
@@ -135,7 +130,6 @@ public:
     void takeInGuess(Player *player)
     {
         std::string guess;
-        int row, col;
 
         for(;;)
         {
@@ -263,6 +257,7 @@ public:
 
     }//end checkGuess
 
+    // takes in the Computer's next guess
     void takeInCGuess(Computer *computer)
     {
         std::string guess;
