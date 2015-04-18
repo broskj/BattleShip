@@ -24,21 +24,22 @@ public:
     int dcount;
     bool dflag;
 
-void qempty(std::queue<int> &q)
-{
-    std::queue<int>().swap(q);
-    this->dcount = 0;
-    this->dflag = false;
-    return;
-}
-
-	void qprint(std::queue<int> &q)
-	{
-    while (!q.empty()) {
-        q.pop();
+    void qempty(std::queue<int> &q)
+    {
+        std::queue<int>().swap(q);
+        this->dcount = 0;
+        this->dflag = false;
+        return;
     }
-    return;
-}
+
+    void qprint(std::queue<int> &q)
+    {
+        while (!q.empty())
+        {
+            q.pop();
+        }
+        return;
+    }
 
     Computer(int mode)
     {
@@ -106,8 +107,8 @@ void qempty(std::queue<int> &q)
         }
         else if(difficulty == 2)
         {
-			//do nothing, impossible mode
-		}
+            //do nothing, impossible mode
+        }
         else
             std::cout << "Something happened Computer.h" << std::endl;
     }//end Computer
@@ -165,19 +166,20 @@ void qempty(std::queue<int> &q)
         return false;
     }//end sunk
 
-	void changeDirection(void)
-	{
-		int s = this->nextRows.front();
-		while(s != -1) {
-			this->nextRows.pop();
-			this->nextCols.pop();
-			s = this->nextRows.front();
-		}
-		this->nextRows.pop();
-		this->nextCols.pop();
+    void changeDirection(void)
+    {
+        int s = this->nextRows.front();
+        while(s != -1)
+        {
+            this->nextRows.pop();
+            this->nextCols.pop();
+            s = this->nextRows.front();
+        }
+        this->nextRows.pop();
+        this->nextCols.pop();
         this->dcount--;
         this->dflag=false;
-	}
+    }
 
     void findNextCoordinates(void)
     {
@@ -198,11 +200,12 @@ void qempty(std::queue<int> &q)
                 nextRowGuess = rand() % 10;
                 nextColGuess = rand() % 10;
             }
-		}
-        if (dcount == 0 && difficulty == 1) {
-			// We're actually going to use the stored values, so pop them
-			// so that we have fresh ones next time.
-			if(rowPattern.size() > 0)
+        }
+        if (dcount == 0 && difficulty == 1)
+        {
+            // We're actually going to use the stored values, so pop them
+            // so that we have fresh ones next time.
+            if(rowPattern.size() > 0)
                 rowPattern.pop_back();
             if(colPattern.size() > 0)
                 colPattern.pop_back();
@@ -210,16 +213,19 @@ void qempty(std::queue<int> &q)
         }
 
 
-        switch (dcount) {
+        switch (dcount)
+        {
         case 4:
-            if (dflag) { // We got a hit going North, so let's switch to South.
+            if (dflag)   // We got a hit going North, so let's switch to South.
+            {
                 /* Remove (what's effectively East) */
                 this->changeDirection();
             } // Now remove (effectively the remaining North coords)
             this->changeDirection();
             return;
         case 3:
-            if (dflag) { // We got a hit going East, so let's switch to West.
+            if (dflag)   // We got a hit going East, so let's switch to West.
+            {
                 /* Remove (what's effectively South) */
                 this->changeDirection();
             }// Now remove (effectively the remaining East coords)
@@ -227,16 +233,19 @@ void qempty(std::queue<int> &q)
             return;
         case 2: // Miss going South, so let's switch to West.
             // Now remove (effectively the remaining South coords)
-            if (dflag) {
+            if (dflag)
+            {
                 this->qempty(this->nextRows);
                 this->qempty(this->nextCols);
-			} else {
+            }
+            else
+            {
                 this->changeDirection();
                 return;
-			}
+            }
         default:
-			this->qempty(this->nextRows);
-			this->qempty(this->nextCols);
+            this->qempty(this->nextRows);
+            this->qempty(this->nextCols);
             return;
         }
 

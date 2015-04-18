@@ -116,65 +116,72 @@ bool computerTurn(Board *playerBoard, Computer *compShip, Player *playerShip)
             col = rand() % 10;
         }
         pause();
-    	cout << "The computer is firing at " << row << (char)(col+'A') << endl;
-		pause();
+        cout << "The computer is firing at " << row << (char)(col+'A') << endl;
+        pause();
         playerBoard->checkGuess(row, col, playerShip);
         pause();
 
         if(playerBoard->checkGameOver() == 1)
-		{
+        {
             pause();
-			shipAnimation(0);
-			pause();
-			cls();
-			return true;
-		}
-		return false;
+            shipAnimation(0);
+            pause();
+            cls();
+            return true;
+        }
+        return false;
     }
 
-	if (compShip->dcount == 0) /* Not currently firing at a ship */
-	{
-		row = compShip->nextRowGuess;
-		col = compShip->nextColGuess;
-		while(playerBoard->getIndex(row, col) == 2 ||
-				playerBoard->getIndex(row, col) == 3)
-		{
-			compShip->findNextCoordinates();
-			row = compShip->nextRowGuess;
-			col = compShip->nextColGuess;
-		}
-	} else { /* Continue to fire at the ship we're firing at */
-		row = compShip->nextRows.front();
-		if (row == -1) {
-			compShip->nextRows.pop();
-			compShip->nextCols.pop();
-			row = compShip->nextRows.front();
+    if (compShip->dcount == 0) /* Not currently firing at a ship */
+    {
+        row = compShip->nextRowGuess;
+        col = compShip->nextColGuess;
+        while(playerBoard->getIndex(row, col) == 2 ||
+                playerBoard->getIndex(row, col) == 3)
+        {
+            compShip->findNextCoordinates();
+            row = compShip->nextRowGuess;
+            col = compShip->nextColGuess;
+        }
+    }
+    else     /* Continue to fire at the ship we're firing at */
+    {
+        row = compShip->nextRows.front();
+        if (row == -1)
+        {
+            compShip->nextRows.pop();
+            compShip->nextCols.pop();
+            row = compShip->nextRows.front();
             compShip->dcount --;
             compShip->dflag = false;
-		}
+        }
 
-		compShip->nextRows.pop();
-		col = compShip->nextCols.front();
-		compShip->nextCols.pop();
+        compShip->nextRows.pop();
+        col = compShip->nextCols.front();
+        compShip->nextCols.pop();
 
-	}
-	while(playerBoard->getIndex(row, col) == 2 ||
+    }
+    while(playerBoard->getIndex(row, col) == 2 ||
             playerBoard->getIndex(row, col) == 3)
     {
         compShip->findNextCoordinates();
-         if (compShip->dcount == 0) {
-             row = compShip->nextRowGuess;
-             col = compShip->nextColGuess;
-         } else {
-             if (compShip->nextRows.front() == -1) {
-                 compShip->nextRows.pop();
-                 compShip->nextCols.pop();
-             }
-             row = compShip->nextRows.front();
-             col = compShip->nextCols.front();
-             compShip->nextRows.pop();
-             compShip->nextCols.pop();
-         }
+        if (compShip->dcount == 0)
+        {
+            row = compShip->nextRowGuess;
+            col = compShip->nextColGuess;
+        }
+        else
+        {
+            if (compShip->nextRows.front() == -1)
+            {
+                compShip->nextRows.pop();
+                compShip->nextCols.pop();
+            }
+            row = compShip->nextRows.front();
+            col = compShip->nextCols.front();
+            compShip->nextRows.pop();
+            compShip->nextCols.pop();
+        }
     }
 A:
     pause();
@@ -198,11 +205,14 @@ A:
         }
         else /* Set up for targeting a ship */
         {
-			compShip->dcount = 4;
+            compShip->dcount = 4;
             /* North */
             for (int i = 1; i < 5; ++i)
             {
-                if ((row - i) < 0) { break; }
+                if ((row - i) < 0)
+                {
+                    break;
+                }
                 compShip->nextRows.push(row - i);
                 compShip->nextCols.push(col);
             }
@@ -211,7 +221,10 @@ A:
             /* East */
             for (int i = 1; i < 5; ++i)
             {
-                if ((col + i) > 9) { break; }
+                if ((col + i) > 9)
+                {
+                    break;
+                }
                 compShip->nextRows.push(row);
                 compShip->nextCols.push(col + i);
             }
@@ -220,7 +233,10 @@ A:
             /* South */
             for (int i = 1; i < 5; ++i)
             {
-                if ((row + i) > 9) { break; }
+                if ((row + i) > 9)
+                {
+                    break;
+                }
                 compShip->nextRows.push(row + i);
                 compShip->nextCols.push(col);
             }
@@ -229,7 +245,10 @@ A:
             /* West */
             for (int i = 1; i < 5; ++i)
             {
-                if ((col - i) < 0) { break; }
+                if ((col - i) < 0)
+                {
+                    break;
+                }
                 compShip->nextRows.push(row);
                 compShip->nextCols.push(col - i);
             }
@@ -241,25 +260,29 @@ A:
     {
         compShip->changeDirection();
         row = compShip->nextRowGuess;
-		col = compShip->nextColGuess;
-		while(playerBoard->getIndex(row, col) == 2 ||
-				playerBoard->getIndex(row, col) == 3)
-		{
-			compShip->findNextCoordinates();
-			if (compShip->dcount == 0) {
-                 row = compShip->nextRowGuess;
-                 col = compShip->nextColGuess;
-             } else {
-                 if (compShip->nextRows.front() == -1) {
-                     compShip->nextRows.pop();
-                     compShip->nextCols.pop();
-                 }
-                 row = compShip->nextRows.front();
-                 col = compShip->nextCols.front();
-                 compShip->nextRows.pop();
-                 compShip->nextCols.pop();
-             }
-		}
+        col = compShip->nextColGuess;
+        while(playerBoard->getIndex(row, col) == 2 ||
+                playerBoard->getIndex(row, col) == 3)
+        {
+            compShip->findNextCoordinates();
+            if (compShip->dcount == 0)
+            {
+                row = compShip->nextRowGuess;
+                col = compShip->nextColGuess;
+            }
+            else
+            {
+                if (compShip->nextRows.front() == -1)
+                {
+                    compShip->nextRows.pop();
+                    compShip->nextCols.pop();
+                }
+                row = compShip->nextRows.front();
+                col = compShip->nextCols.front();
+                compShip->nextRows.pop();
+                compShip->nextCols.pop();
+            }
+        }
         goto A;
     }
     else /* Miss */
@@ -348,10 +371,10 @@ bool playGame(int mode, int difficulty)
         cls();
         cout << "The computer is now placing its ships";
         for(int i = 3; i > 0; i--)
-		{
-			cout << ". ";
-			sleep(1000);
-		}
+        {
+            cout << ". ";
+            sleep(1000);
+        }
         randomPlacement(playerTwo, computer1);
 
         /*
