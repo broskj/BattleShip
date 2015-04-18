@@ -24,9 +24,11 @@ public:
     int dcount;
     bool dflag;
 
-	void qempty(std::queue<int> &q)
-	{
+void qempty(std::queue<int> &q)
+{
     std::queue<int>().swap(q);
+    this->dcount = 0;
+    this->dflag = false;
     return;
 }
 
@@ -167,17 +169,14 @@ public:
 	{
 		int s = this->nextRows.front();
 		while(s != -1) {
-			std::cout << "Debug: row = " << s << std::endl;
 			this->nextRows.pop();
 			this->nextCols.pop();
 			s = this->nextRows.front();
 		}
-		std::cout << "Found -1" << std::endl;
-		std::cout << "Debug: row = " << this->nextRows.front() << std::endl;
 		this->nextRows.pop();
 		this->nextCols.pop();
-		std::cout << "Removed -1" << std::endl;
-		std::cout << "Debug: row = " << this->nextRows.front() << std::endl;
+        this->dcount--;
+        this->dflag=false;
 	}
 
     void findNextCoordinates(void)
@@ -203,19 +202,20 @@ public:
         if (dcount == 0 && difficulty == 1) {
 			// We're actually going to use the stored values, so pop them
 			// so that we have fresh ones next time.
-            rowPattern.pop_back();
-            colPattern.pop_back();
+			if(rowPattern.size() > 0)
+                rowPattern.pop_back();
+            if(colPattern.size() > 0)
+                colPattern.pop_back();
             return;
         }
+
 
         switch (dcount) {
         case 4:
             if (dflag) { // We got a hit going North, so let's switch to South.
                 /* Remove (what's effectively East) */
-                std::cout << "Removing East" << std::endl;
                 this->changeDirection();
             } // Now remove (effectively the remaining North coords)
-            std::cout << "Removing North" << std::endl;
             this->changeDirection();
             return;
         case 3:
@@ -225,13 +225,14 @@ public:
             }// Now remove (effectively the remaining East coords)
             this->changeDirection();
             return;
-        case 2: // No hits going South, so let's switch to West.
+        case 2: // Miss going South, so let's switch to West.
             // Now remove (effectively the remaining South coords)
-            if (!dflag) {
-				this->changeDirection();
+            if (dflag) {
+                this->qempty(this->nextRows);
+                this->qempty(this->nextCols);
 			} else {
-				this->qempty(this->nextRows);
-				this->qempty(this->nextCols);
+                this->changeDirection();
+                return;
 			}
         default:
 			this->qempty(this->nextRows);
