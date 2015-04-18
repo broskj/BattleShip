@@ -28,7 +28,7 @@ bool colWithinBounds(char col)
     return true;
 }//end colWithinBounds
 
-bool isValid(int startRow, int endRow, char startColumn, char endColumn, Player *playerShip, Board *playerBoard, int shipSize)
+bool isValid(int startRow, int endRow, char startColumn, char endColumn, Player *playerShip, Board *playerBoard, int shipSize, bool display)
 {
     for(int r = startRow; r <= endRow; r++)
     {
@@ -38,7 +38,8 @@ bool isValid(int startRow, int endRow, char startColumn, char endColumn, Player 
             {
                 //indicates overlapping ships.
                 //The board is reprinted, so that the player can see where they could alternatively place their ships
-                cout << "Invalid ship placement, cannot overlap ships." << endl;
+                if(display)
+                    cout << "Invalid ship placement, cannot overlap ships." << endl;
                 return false;
             }
         }
@@ -108,7 +109,6 @@ void randomPlacement(Board *&playerBoard, Player *&playerShip)
     int row = 0, size = 0, orientation = 0 /*Use 0 for vertical, 1 for horizontal*/;
     char col = 'A';
 
-
     srand(time(NULL));
     for(int i = 0; i < MAX_SHIPS; i++)
     {
@@ -118,10 +118,10 @@ void randomPlacement(Board *&playerBoard, Player *&playerShip)
 A:
             orientation = rand() % 2; // random number between 0 and 1
             row = rand() % 10; // random number between 0 and 9
-            if((row+size) > 9)
+            if((row+size) > 9 && orientation == 0)
                 row -= size;
             col = rand() % 10 + 'A'; // random number between 65 and 74 (A through J)
-            if((col+size) > 'J')
+            if((col+size) > 'J' && orientation == 1)
                 col -= size;
 
             if(playerBoard->getIndex(row, col) != 0)
@@ -137,7 +137,7 @@ A:
 
             if(orientation == 0)
             {
-                if(isValid(row, row+size-1, col, col, playerShip, playerBoard, size) && rowWithinBounds(row+size-1))
+                if(isValid(row, row+size-1, col, col, playerShip, playerBoard, size, false) && rowWithinBounds(row+size-1))
                 {
                     playerBoard->placeShip(row, row+size-1, col, col, playerShip, i);
                     break;
@@ -147,7 +147,7 @@ A:
             }
             else if(orientation == 1)
             {
-                if(isValid(row, row, col, col+size-1, playerShip, playerBoard, size) && colWithinBounds(col+size-1))
+                if(isValid(row, row, col, col+size-1, playerShip, playerBoard, size, false) && colWithinBounds(col+size-1))
                 {
                     playerBoard->placeShip(row, row, col, col+size-1, playerShip, i);
                     break;
@@ -167,9 +167,9 @@ void randomPlacement(Board *&computerBoard, Computer *&computerShip)
      * method used for AI.  uses random number generator to pick a starting point
      *  and an orientation, and places a ship should the location be valid.
      */
+
     int row = 0, size = 0, orientation = 0 /*Use 0 for vertical, 1 for horizontal*/;
     char col = 'A';
-
 
     srand(time(NULL));
     for(int i = 0; i < MAX_SHIPS; i++)
@@ -180,10 +180,10 @@ void randomPlacement(Board *&computerBoard, Computer *&computerShip)
 A:
             orientation = rand() % 2; // random number between 0 and 1
             row = rand() % 10; // random number between 0 and 9
-            if((row+size) > 9)
+            if((row+size) > 9 && orientation == 0)
                 row -= size;
             col = rand() % 10 + 'A'; // random number between 65 and 74 (A through J)
-            if((col+size) > 'J')
+            if((col+size) > 'J' && orientation == 1)
                 col -= size;
 
             if(computerBoard->getIndex(row, col) != 0)
@@ -199,7 +199,7 @@ A:
 
             if(orientation == 0)
             {
-                if(isValid(row, row+size-1, col, col, computerShip, computerBoard, size) && rowWithinBounds(row+size-1))
+                if(isValid(row, row+size-1, col, col, computerShip, computerBoard, size, false) && rowWithinBounds(row+size-1))
                 {
                     computerBoard->placeCShip(row, row+size-1, col, col, computerShip, i);
                     break;
@@ -209,7 +209,7 @@ A:
             }
             else if(orientation == 1)
             {
-                if(isValid(row, row, col, col+size-1, computerShip, computerBoard, size) && colWithinBounds(col+size-1))
+                if(isValid(row, row, col, col+size-1, computerShip, computerBoard, size, false) && colWithinBounds(col+size-1))
                 {
                     computerBoard->placeCShip(row, row, col, col+size-1, computerShip, i);
                     break;
@@ -305,7 +305,7 @@ void initialShipPlacement(Board *&playerBoard, Player *&playerShip)
 				}
 
 				//flag used to indicate incorrect ship size, position, etc.
-				flag = !isValid(startRow, endRow, startColumn, endColumn, playerShip, playerBoard, playerShip->getShipSize(i));
+				flag = !isValid(startRow, endRow, startColumn, endColumn, playerShip, playerBoard, playerShip->getShipSize(i), true);
 
 			}
 			while(flag);
@@ -391,7 +391,7 @@ void runTutorial()
     board1->printBoard(1);
 
     //A message is printed educating the user on the different boards.
-    cout << "Here you see your board on top and your opponent's board without " <<
+    cout << "Here you see your board on bottom and your opponent's board on top without " <<
          "their ships.\nYour opponent sees a similar screen during their turn.  " <<
          "Now, your goal is\nto sink the enemy ships.  Let's take a shot at" <<
          " 2B." << endl << endl;
@@ -424,7 +424,7 @@ void runTutorial()
     board2->printBoard(2);
     cout << "Your Board" << endl;
     board1->printBoard(1);
-    cout << "Your ship was hit!  In the interest of time, we'll assume you've grasped\n" <<
+    cout << "The computer missed!  In the interest of time, we'll assume you've grasped\n" <<
          "the general idea and fast forward a bit." << endl << endl;
     pause();
 
@@ -564,12 +564,13 @@ void printInstructions()
 
 }//end printInstructions
 
-/*void shipAnimation(int player)
+void shipAnimation(int player)
 {
-
     vector<string> lines;
-    ifstream file("ship.txt");
+    ifstream file("shipAnimation.txt");
     string str;
+
+    cls();
 
     while(std::getline(file, str))
     {
@@ -588,11 +589,12 @@ void printInstructions()
         if(player != 0)
             cout << "Player " << player << " wins!" << endl;
         else
-            cout << "YOU LOSE, COMPUTER WINS" <<endl;
+            cout << "Computer wins!" <<endl;
         lines.pop_back();
-        sleep(1000);
-        cls();
+        sleep(100);
+        if(j != 43)
+            cls();
     }
-}// end shipAnimation*/
+}// end shipAnimation
 
 #endif
