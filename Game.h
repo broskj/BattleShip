@@ -7,6 +7,8 @@ using namespace std;
 /*
  *TODO:
  * if AI gets a hit, check that places in the pattern haven't been guessed already.
+ * if two horizontal ships stacked, program breaks after shooting south of second.
+ * if computer fires off board, changes direction to east from north, then breaks the move after
  */
 
 void switchingBoards()
@@ -28,8 +30,8 @@ void quickPlacement(Board *&playerBoard, Player *&playerShip)
      * method used for testing.  much less time intensive compared to
      *  placing ships for two players individually.
      */
-    playerBoard->placeShip(7, 8, 'B', 'B', playerShip, 0);
-    playerBoard->placeShip(2, 2, 'D', 'F', playerShip, 1);
+    playerBoard->placeShip(1, 1, 'A', 'B', playerShip, 0);
+    playerBoard->placeShip(2, 2, 'B', 'D', playerShip, 1);
     playerBoard->placeShip(0, 2, 'I', 'I', playerShip, 2);
     playerBoard->placeShip(5, 5, 'B', 'E', playerShip, 3);
     playerBoard->placeShip(8, 4, 'H', 'H', playerShip, 4);
@@ -59,8 +61,7 @@ bool playerTurn(Board *playerOne, Board *playerTwo, Player *playerShip, int play
     //checks for win (all ships sunk)
     if(playerTwo->checkGameOver() == 1)
     {
-        cout << "Player " << player << " wins!" << endl;
-        //shipAnimation(player);
+        shipAnimation(player);
         pause();
         return true;
         //if all ships have been sunk, the value of true is returned.
@@ -92,8 +93,7 @@ bool playerTurn(Board *playerOne, Board *playerTwo, Computer *computerShip, int 
     //checks for win (all ships sunk)
     if(playerTwo->checkGameOver() == 1)
     {
-        cout << "Player " << player << " wins!" << endl;
-        //shipAnimation(player);
+        shipAnimation(player);
         pause();
         return true;
         //if all ships have been sunk, the value of true is returned.
@@ -120,10 +120,11 @@ bool computerTurn(Board *playerBoard, Computer *compShip, Player *playerShip)
 		cout << "The computer is firing at " << row << (char)(col+'A') << endl;
 		pause();
         playerBoard->checkGuess(row, col, playerShip);
+        pause();
 
         if(playerBoard->checkGameOver() == 1)
 		{
-			cout << "You lost!" << endl;
+			shipAnimation(0);
 			pause();
 			return true;
 		}
@@ -147,6 +148,8 @@ bool computerTurn(Board *playerBoard, Computer *compShip, Player *playerShip)
 			compShip->nextRows.pop();
 			compShip->nextCols.pop();
 			row = compShip->nextRows.front();
+            compShip->dcount --;
+            compShip->dflag = false;
 		}
 
 		compShip->nextRows.pop();
@@ -154,7 +157,25 @@ bool computerTurn(Board *playerBoard, Computer *compShip, Player *playerShip)
 		compShip->nextCols.pop();
 
 	}
-
+	while(playerBoard->getIndex(row, col) == 2 ||
+            playerBoard->getIndex(row, col) == 3)
+    {
+        compShip->findNextCoordinates();
+         if (compShip->dcount == 0) {
+             row = compShip->nextRowGuess;
+             col = compShip->nextColGuess;
+         } else {
+             if (compShip->nextRows.front() == -1) {
+                 compShip->nextRows.pop();
+                 compShip->nextCols.pop();
+             }
+             row = compShip->nextRows.front();
+             col = compShip->nextCols.front();
+             compShip->nextRows.pop();
+             compShip->nextCols.pop();
+         }
+    }
+A:
     pause();
     cout << "The computer is firing at " << row << (char)(col+'A') << endl;
     pause();
@@ -215,6 +236,31 @@ bool computerTurn(Board *playerBoard, Computer *compShip, Player *playerShip)
 
         }
     }
+    else if(shipfound == -2)
+    {
+        compShip->changeDirection();
+        row = compShip->nextRowGuess;
+		col = compShip->nextColGuess;
+		while(playerBoard->getIndex(row, col) == 2 ||
+				playerBoard->getIndex(row, col) == 3)
+		{
+			compShip->findNextCoordinates();
+			if (compShip->dcount == 0) {
+                 row = compShip->nextRowGuess;
+                 col = compShip->nextColGuess;
+             } else {
+                 if (compShip->nextRows.front() == -1) {
+                     compShip->nextRows.pop();
+                     compShip->nextCols.pop();
+                 }
+                 row = compShip->nextRows.front();
+                 col = compShip->nextCols.front();
+                 compShip->nextRows.pop();
+                 compShip->nextCols.pop();
+             }
+		}
+        goto A;
+    }
     else /* Miss */
     {
         compShip->findNextCoordinates();
@@ -224,6 +270,7 @@ bool computerTurn(Board *playerBoard, Computer *compShip, Player *playerShip)
     if(playerBoard->checkGameOver() == 1)
     {
         cout << "You lost!" << endl;
+        shipAnimation(0);
         pause();
         return true;
     }
@@ -295,8 +342,8 @@ bool playGame(int mode, int difficulty)
     case 1:  //PVC
         //Signals for player 2 to place his/her ships
         //calls the randomPlacement method to randomly place ships
-        //randomPlacement(playerTwo, player2);
-        //quickPlacement(playerTwo, player2);
+        //quickPlacement(playerTwo, player2
+        cls();
         cout << "The computer is now placing its ships";
         for(int i = 3; i > 0; i--)
 		{
