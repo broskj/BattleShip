@@ -4,8 +4,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <ctime>
-#include <chrono>
-#include <thread>
 #include <vector>
 #include <queue>
 
@@ -70,13 +68,14 @@ void pause()
     while(ui.length() > 0);
     return;
 }
+
+#include <thread>
+#include <chrono>
 void sleep(unsigned millis)
 {
-	clock_t time_end;
-    time_end = clock() + millis * CLOCKS_PER_SEC/1000;
-    while (clock() < time_end){}
+    std::this_thread::sleep_for(std::chrono::milliseconds(millis));
+    return;
 }
-
 #endif
 
 /*
