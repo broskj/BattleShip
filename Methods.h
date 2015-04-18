@@ -10,10 +10,6 @@
 #include "Definitions.h"
 using namespace std;
 
-/*
-TODO:
-*/
-
 bool rowWithinBounds(int row)
 {
     if(row < 0 || row > 9)
@@ -77,7 +73,7 @@ bool isValid(int startRow, int endRow, char startColumn, char endColumn, Player 
 
 void tutorialCoordinate(int expectedRow, int expectedCol)
 {
-	std::string guess;
+    std::string guess;
 
 	for(;;)
 	{
