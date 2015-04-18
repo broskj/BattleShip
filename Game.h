@@ -4,13 +4,6 @@
 #include "Computer.h"
 using namespace std;
 
-/*
- *TODO:
- * if AI gets a hit, check that places in the pattern haven't been guessed already.
- * if two horizontal ships stacked, program breaks after shooting south of second.
- * if computer fires off board, changes direction to east from north, then breaks the move after
- */
-
 void switchingBoards()
 {
     pause();
@@ -37,6 +30,7 @@ void quickPlacement(Board *&playerBoard, Player *&playerShip)
     playerBoard->placeShip(8, 4, 'H', 'H', playerShip, 4);
 }//end quickPlacement
 
+// playerTurn for Player vs. Player
 bool playerTurn(Board *playerOne, Board *playerTwo, Player *playerShip, int player)
 {
     cin.clear();
@@ -69,6 +63,7 @@ bool playerTurn(Board *playerOne, Board *playerTwo, Player *playerShip, int play
     return false;
 }//end playerTurn
 
+// Player turn for Player vs. Computer
 bool playerTurn(Board *playerOne, Board *playerTwo, Computer *computerShip, int player)
 {
     cin.clear();
@@ -117,7 +112,7 @@ bool computerTurn(Board *playerBoard, Computer *compShip, Player *playerShip)
             col = rand() % 10;
         }
         pause();
-		cout << "The computer is firing at " << row << (char)(col+'A') << endl;
+    	cout << "The computer is firing at " << row << (char)(col+'A') << endl;
 		pause();
         playerBoard->checkGuess(row, col, playerShip);
         pause();
@@ -269,7 +264,6 @@ A:
     pause();
     if(playerBoard->checkGameOver() == 1)
     {
-        cout << "You lost!" << endl;
         shipAnimation(0);
         pause();
         return true;
